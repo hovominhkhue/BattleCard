@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/BattleCard.Application/BattleCard.Application.csproj" />
+    <Project Path="src/BattleCard.Cli/BattleCard.Cli.csproj" />
+    <Project Path="src/BattleCard.Domain/BattleCard.Domain.csproj" />
+    <Project Path="src/BattleCard.Infrastructure/BattleCard.Infrastructure.csproj" />
+  </Folder>
+</Solution>
