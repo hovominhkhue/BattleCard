@@ -1,6 +1,7 @@
 namespace BattleCard.Application.Combat;
 
 using BattleCard.Domain.Entities.Base;
+using BattleCard.Application.Actions;
 
 public class CombatSession
 {
@@ -50,8 +51,8 @@ public class CombatSession
         if (firstAliveEnemy == null)
             return;
 
-        var damage = new Damage(hero.BaseDamage.Value);
-        firstAliveEnemy.TakeDamage(damage);
+        var action = new BasicAttackAction();
+        var result = action.Execute(hero, firstAliveEnemy);
 
         if (!firstAliveEnemy.IsAlive)
             context.RemoveDefeatedEnemy(firstAliveEnemy);

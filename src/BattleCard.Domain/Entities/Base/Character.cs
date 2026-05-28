@@ -7,6 +7,7 @@ public abstract class Character
     public string Name { get; private set; }
     public HealthPoints Health { get; private set; }
     public Damage BaseDamage { get; private set; }
+    public int Armor { get; protected set; }
 
     public bool IsAlive => Health.IsAlive;
 
