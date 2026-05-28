@@ -1,12 +1,11 @@
 namespace BattleCard.Application.Combat;
 
+using BattleCard.Application.States;
 using BattleCard.Domain.Entities.Base;
-using BattleCard.Application.Actions;
 
 public class CombatSession
 {
     private readonly WaveManager _waveManager;
-    private const double BetweenWaveHealPercent = 0.2;
 
     public CombatSession(WaveManager waveManager)
     {
@@ -15,64 +14,26 @@ public class CombatSession
 
     public void Run(Hero hero)
     {
-        for (int wave = 1; wave <= 3; wave++)
+        var enemies = _waveManager.CreateWave(1);
+        var context = new CombatContext(hero, 1, enemies);
+
+        ICombatState currentState = new PlayerTurnState();
+
+        while (currentState is not VictoryState && currentState is not DefeatState)
         {
-            var enemies = _waveManager.CreateWave(wave);
-            var context = new CombatContext(hero, wave, enemies);
+            currentState.Enter(context);
+            currentState = currentState.Execute(context);
 
-            RunWave(context);
-
-            if (!hero.IsAlive)
-                break;
-
-            if (wave < 3)
-                ApplyBetweenWaveHeal(hero);
+            if (currentState is PlayerTurnState && context.EnemiesAlive.Count == 0)
+            {
+                if (context.CurrentWave < 3)
+                {
+                    var newEnemies = _waveManager.CreateWave(context.CurrentWave);
+                    context.EnemiesAlive.Clear();
+                    foreach (var enemy in newEnemies)
+                        context.EnemiesAlive.Add(enemy);
+                }
+            }
         }
-    }
-
-    private void RunWave(CombatContext context)
-    {
-        while (!context.IsCombatOver && !context.IsWaveCleared)
-        {
-            ExecutePlayerTurn(context);
-
-            if (context.IsCombatOver || context.IsWaveCleared)
-                break;
-
-            ExecuteEnemyTurns(context);
-        }
-    }
-
-    private void ExecutePlayerTurn(CombatContext context)
-    {
-        var hero = context.Hero;
-        var firstAliveEnemy = context.EnemiesAlive.FirstOrDefault();
-
-        if (firstAliveEnemy == null)
-            return;
-
-        var action = new BasicAttackAction();
-        var result = action.Execute(hero, firstAliveEnemy);
-
-        if (!firstAliveEnemy.IsAlive)
-            context.RemoveDefeatedEnemy(firstAliveEnemy);
-    }
-
-    private void ExecuteEnemyTurns(CombatContext context)
-    {
-        foreach (var enemy in context.EnemiesAlive.ToList())
-        {
-            if (!enemy.IsAlive)
-                continue;
-
-            var damage = new Damage(enemy.BaseDamage.Value);
-            context.Hero.TakeDamage(damage);
-        }
-    }
-
-    private void ApplyBetweenWaveHeal(Hero hero)
-    {
-        int healAmount = (int)Math.Ceiling(hero.Health.Maximum * BetweenWaveHealPercent);
-        hero.Health.Heal(healAmount);
     }
 }
