@@ -1,8 +1,17 @@
-﻿using BattleCard.Domain.Entities.Heroes;
-using BattleCard.Application.Combat;
+﻿using BattleCard.Application.Combat;
+using BattleCard.Application.Factories;
+using BattleCard.Domain.Enums;
 
-var hero = new Warrior("Aragorn");
-var session = new CombatSession();
+// Créer les factories
+var heroFactory = new HeroFactory();
+var enemyFactory = new EnemyFactory();
+
+// Créer le héros via la factory
+var hero = heroFactory.Create(HeroClass.Warrior, "Aragorn");
+
+// Créer la session avec le WaveManager injecté
+var waveManager = new WaveManager(enemyFactory);
+var session = new CombatSession(waveManager);
 
 Console.WriteLine($"Starting combat with {hero.Name} ({hero.Class})");
 Console.WriteLine($"Hero Health: {hero.Health.Current}/{hero.Health.Maximum}\n");

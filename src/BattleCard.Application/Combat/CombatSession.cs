@@ -8,9 +8,9 @@ public class CombatSession
     private readonly WaveManager _waveManager;
     private const double BetweenWaveHealPercent = 0.2;
 
-    public CombatSession()
+    public CombatSession(WaveManager waveManager)
     {
-        _waveManager = new WaveManager();
+        _waveManager = waveManager;
     }
 
     public void Run(Hero hero)
