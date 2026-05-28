@@ -54,3 +54,16 @@ BattleCard/
 - **Base:** `Character`, `Hero`, `Enemy`
 - **Heroes:** Warrior, Mage, Thief
 - **Enemies:** Goblin, GoblinArcher, OrcBoss
+
+## Combat System (Procedural)
+
+**CombatContext:** Holds current combat state (hero, enemies, wave number)
+
+**CombatSession:** Orchestrates combat flow
+- 3 waves with predefined enemy compositions
+- Turn-based: Hero attacks first enemy → all enemies counter-attack
+- Between waves: Hero heals +20% max HP (ceiling rounding)
+- Victory: All 3 waves cleared with hero alive
+- Defeat: Hero HP ≤ 0
+
+**WaveManager:** Generates enemy waves
