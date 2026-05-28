@@ -5,7 +5,7 @@ using BattleCard.Domain.Entities.Base;
 public class CombatSession
 {
     private readonly WaveManager _waveManager;
-    private const int BetweenWaveHealPercent = 20;
+    private const double BetweenWaveHealPercent = 0.2;
 
     public CombatSession()
     {
@@ -71,7 +71,7 @@ public class CombatSession
 
     private void ApplyBetweenWaveHeal(Hero hero)
     {
-        int healAmount = (int)Math.Ceiling(hero.Health.Maximum * BetweenWaveHealPercent / 100.0);
+        int healAmount = (int)Math.Ceiling(hero.Health.Maximum * BetweenWaveHealPercent);
         hero.Health.Heal(healAmount);
     }
 }
