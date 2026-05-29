@@ -1,21 +1,24 @@
 namespace BattleCard.Application.Combat;
 
+using BattleCard.Application.Events;
 using BattleCard.Application.States;
 using BattleCard.Domain.Entities.Base;
 
 public class CombatSession
 {
     private readonly WaveManager _waveManager;
+    private readonly CombatEventPublisher _eventPublisher;
 
-    public CombatSession(WaveManager waveManager)
+    public CombatSession(WaveManager waveManager, CombatEventPublisher? eventPublisher = null)
     {
         _waveManager = waveManager;
+        _eventPublisher = eventPublisher ?? new CombatEventPublisher();
     }
 
     public void Run(Hero hero)
     {
         var enemies = _waveManager.CreateWave(1);
-        var context = new CombatContext(hero, 1, enemies);
+        var context = new CombatContext(hero, 1, enemies, _eventPublisher);
 
         ICombatState currentState = new PlayerTurnState();
 
@@ -32,6 +35,8 @@ public class CombatSession
                     context.EnemiesAlive.Clear();
                     foreach (var enemy in newEnemies)
                         context.EnemiesAlive.Add(enemy);
+
+                    _eventPublisher.PublishWaveEnded(new WaveEndedEvent(context.CurrentWave - 1));
                 }
             }
         }

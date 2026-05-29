@@ -2,6 +2,7 @@ namespace BattleCard.Application.Commands;
 
 using BattleCard.Application.Actions;
 using BattleCard.Application.Combat;
+using BattleCard.Application.Events;
 using BattleCard.Domain.Entities.Base;
 
 public class HealCommand : ICommand
@@ -16,6 +17,11 @@ public class HealCommand : ICommand
             return new CombatResult(hero, hero, 0, false, "No healing potions left");
 
         var result = action.Execute(hero, hero);
+
+        // Publier l'événement soin
+        context.Publisher.PublishCharacterHealed(
+            new CharacterHealedEvent(hero, result.DamageDealt)
+        );
 
         return result;
     }

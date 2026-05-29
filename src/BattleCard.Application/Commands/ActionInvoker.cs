@@ -1,19 +1,23 @@
 namespace BattleCard.Application.Commands;
 
 using BattleCard.Application.Combat;
+using BattleCard.Application.Events;
 
 public class ActionInvoker
 {
     private readonly Dictionary<string, Func<ICommand>> _commandRegistry;
+    private readonly JournalObserver _journalObserver;
 
-    public ActionInvoker()
+    public ActionInvoker(JournalObserver? journalObserver = null)
     {
+        _journalObserver = journalObserver ?? new JournalObserver();
+        
         _commandRegistry = new Dictionary<string, Func<ICommand>>
         {
             { "1", () => new AttackCommand() },
             { "2", () => new UseSkillCommand() },
             { "3", () => new HealCommand() },
-            { "4", () => new ShowJournalCommand() }
+            { "4", () => new ShowJournalCommand(_journalObserver) }
         };
     }
 

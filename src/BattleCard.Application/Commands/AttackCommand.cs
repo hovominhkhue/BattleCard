@@ -2,6 +2,7 @@ namespace BattleCard.Application.Commands;
 
 using BattleCard.Application.Actions;
 using BattleCard.Application.Combat;
+using BattleCard.Application.Events;
 
 public class AttackCommand : ICommand
 {
@@ -15,6 +16,11 @@ public class AttackCommand : ICommand
 
         var action = new BasicAttackAction();
         var result = action.Execute(hero, target);
+
+        // Publier l'événement dégâts
+        context.Publisher.PublishDamageDealt(
+            new DamageDealtEvent(hero, target, result.DamageDealt)
+        );
 
         if (!target.IsAlive)
             context.RemoveDefeatedEnemy(target);
