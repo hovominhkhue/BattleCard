@@ -2,41 +2,35 @@ namespace BattleCard.Application.States;
 
 using BattleCard.Application.Combat;
 using BattleCard.Application.Events;
+using BattleCard.Application.Ai;
 
 public class EnemyTurnState : ICombatState
 {
-    public void Enter(CombatContext context)
-    {
-        // Setup si besoin
-    }
+    public void Enter(CombatContext context) { }
 
     public ICombatState Execute(CombatContext context)
     {
-        // Chaque ennemi attaque
-        foreach (var enemy in context.EnemiesAlive.ToList())
+        foreach (var enemy in context.EnemiesAlive)
         {
-            if (!enemy.IsAlive)
-                continue;
+            if (enemy.AiStrategy is IAiStrategy ai)
+            {
+                var action = ai.ChooseAction(enemy, context);
+                var result = action.Execute(enemy, context.Hero);
 
-            var damage = new Damage(enemy.BaseDamage.Value);
-            context.Hero.TakeDamage(damage);
+                context.Publisher.PublishDamageDealt(
+                    new DamageDealtEvent(enemy, context.Hero, result.DamageDealt)
+                );
 
-            // Publier l'événement dégâts
-            context.Publisher.PublishDamageDealt(
-                new DamageDealtEvent(enemy, context.Hero, damage.Value)
-            );
+                if (!context.Hero.IsAlive)
+                {
+                    context.Publisher.PublishCharacterDefeated(
+                        new CharacterDefeatedEvent(context.Hero)
+                    );
+                    return new DefeatState();
+                }
+            }
         }
 
-        // Vérifier si héros est mort
-        if (!context.Hero.IsAlive)
-        {
-            context.Publisher.PublishCharacterDefeated(
-                new CharacterDefeatedEvent(context.Hero)
-            );
-            return new DefeatState();
-        }
-
-        // Retour au tour du joueur
         return new PlayerTurnState();
     }
 }
